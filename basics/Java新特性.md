@@ -190,5 +190,96 @@ public class LambdaTest {
     }
 ```
 ## 方法引用与构造器引用
+- 方法引用是Lambda表达式深层次的表达。方法引用就是Lambda表达式,也就是函数式接口的一个实例
+```java
+/**
+ * 使用情景:当要传递给Lambda体操作,已经有实现的方法了,可以使用方法引用
+ * 方法引用,本质上就是Lambda表达式,而Lambda表达式作为函数式接口的实例。所以方法引用,也是函数式接口的实例。
+ * 使用格式: 类(或对象):: 方法名
+ * 使用情况：
+ * 1. 对象 :: 非静态方法
+ * 2. 类 :: 静态方法
+ * 3. 类 :: 非静态方法
+ * 要求:
+ * 1. 接口中的抽象方法的形参列表和返回值类型，与方法引用的方法的形参列表和返回值类型相同
+ */
+public class FieldTest {
+    // 情况一: 对象 :: 实例方法
+    @Test
+    public void test01() {
+        Consumer<String> con1 = str -> System.out.println(str);
+        con1.accept("测试");
+        System.out.println("************************");
+        Consumer<String> con2 = System.out::println;
+        con2.accept("test");
+
+    }
+
+    @Test
+    public void test2() {
+        Employee employee = new Employee();
+        Supplier<String> sup1 = () -> employee.getName();
+        System.out.println(sup1.get());
+        System.out.println("****************");
+        sup1 = employee::getName;
+        System.out.println(sup1);
+    }
+
+    // 情况二： 类 :: 静态方法
+    @Test
+    public void test3() {
+        Comparator<Integer> com1 = ((o1, o2) -> Integer.compare(o1, o2));
+        System.out.println(com1.compare(12, 21));
+        System.out.println("*****************");
+        com1 = Integer::compareTo;
+        System.out.println(com1);
+    }
+
+    // 情况三: 类 :: 非静态方法
+    @Test
+    public void test4() {
+        Comparator<String> com1 = (s1,s3) -> s1.compareTo(s3);
+        System.out.println(com1.compare("abc","abd"));
+        System.out.println("******************");
+        com1 = String::compareTo;
+        System.out.println(com1);
+    }
+}
+```
+- 构造器引用
+```java
+/**
+ * 函数式接口的抽象方法的形参列表和构造器的形参列表一致，
+ * 邮箱方法的返回值类型即为构造器所属的类的类型
+ * 
+ * 数组引用与构造器一致
+ */
+public class FieldTest {
+    // 情况一: 对象 :: 实例方法
+    @Test
+    public void test01() {
+        // 普通
+        Supplier<Employee> sup = new Supplier<Employee>() {
+            @Override
+            public Employee get() {
+                return new Employee();
+            }
+        };
+        // lambda
+        sup = () -> new Employee();
+        // 方法引用
+        sup = Employee::new;
+    }
+
+    @Test
+    public void test02() {
+        Function<Integer, String[]> function = length -> new String[length];
+        String[] apply = function.apply(5);
+        System.out.println(Arrays.toString(apply));
+
+        function = String[]::new;
+    }
+}
+```
 ## Stream API
 ## Optional类
