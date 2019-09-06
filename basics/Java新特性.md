@@ -282,4 +282,171 @@ public class FieldTest {
 }
 ```
 ## Stream API
+简介:可以对集合数据进行并行操作
+
+Stream与Collection集合的区别:
+- Collection是一种静态的内存数据,Stream主要是计算
+
+使用示例:
+```java
+public class StreamTest {
+    // 创建Stream方式一：通过集合
+    @Test
+    public void test01() {
+        List<Employee> list = getData();
+        // 顺序流
+        Stream<Employee> stream = list.stream();
+        // 并行流
+        Stream<Employee> parallelStream = list.parallelStream();
+
+    }
+
+    // 创建Stream方式二: 通过数组
+    @Test
+    public void test02() {
+        int[] ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        // 调用Arrays类的static<T> Stream<T> stream(T[] array); 返回一个流
+        IntStream stream = Arrays.stream(ints);
+        Employee[] arr1 = new Employee[]{new Employee(), new Employee()};
+        Stream<Employee> employeeStream = Arrays.stream(arr1);
+    }
+
+    // 创建Stream方式三:通过Stream的of()
+    @Test
+    public void test03() {
+        Stream<String> stringStream = Stream.of("", "", "");
+    }
+
+    // 创建Stream方式四:创建无限流
+    @Test
+    public void test04() {
+        // 遍历前10个偶数
+        Stream.iterate(0, t -> t + 2).limit(10).forEach(System.out::println);
+
+        Stream.generate(Math::random).limit(10).forEach(System.out::println);
+    }
+
+
+    public List<Employee> getData() {
+        List<Employee> list = new ArrayList<>();
+        list.add(new Employee(1001, "马化腾", 34, 6000.37));
+        list.add(new Employee(1002, "码云", 12, 9876.12));
+        list.add(new Employee(1003, "刘强东", 33, 3000.82));
+        list.add(new Employee(1004, "雷军", 26, 7657.37));
+        list.add(new Employee(1005, "李彦宏", 65, 5555.32));
+        list.add(new Employee(1006, "比尔盖茨", 42, 9500.43));
+        list.add(new Employee(1007, "任正非", 26, 4333.32));
+        list.add(new Employee(1008, "扎克伯格", 35, 2500.32));
+        return list;
+    }
+}
+```
+功能：
+- 筛选与切片
+```java
+    @Test
+    public void test01() {
+        List<Employee> list = getData();
+        Stream<Employee> stream = list.stream();
+        // 过滤
+        stream.filter( e -> e.getSalaty() > 7000).forEach(System.out::println);
+        System.out.println("****************");
+
+        // 截断,使其元素不超过给定数量
+        list.stream().limit(3).forEach(System.out::println);
+        System.out.println("****************");
+
+        // skip 跳过原元素,返回一个扔掉了前n个元素的流。若流中元素不足n个，则返回一个空流
+        list.stream().skip(3).forEach(System.out::println);
+        System.out.println("****************");
+        // distinct -- 筛选，通过流所生成元素的hashCode()和equals()去除重复元素,类似Set集合去重
+        list.stream().distinct().forEach(System.out::println);
+    }
+```
+- 映射
+```java
+ @Test
+    public void test01() {
+        List<String> list = Arrays.asList("aa", "bb", "cc", "vv");
+        // 接收一个函数作为参数,将元素转换成其他形式或提取信息,该函数会被应用到每个元素上,并将其映射成一个新的元素。
+        list.stream().map(str -> str
+                .toUpperCase()).forEach(System.out::println);
+        // 获取员工姓名长度大于3的姓名
+        List<Employee> employeeList = getData();
+        Stream<String> stream = employeeList.stream().map(Employee::getName);
+        stream.filter(name -> name.length() > 3).forEach(System.out::println);
+
+
+        // 接收一个函数作为参数，将流中的每个值都换成另一个流，然后把所有流连接成一个流
+        Stream<Character> characterStream = list.stream().flatMap(StreamTest::fromStringToStream);
+        characterStream.forEach(System.out::println);
+        // 如果不用
+        Stream<Stream<Character>> streamStream = list.stream().map(StreamTest::fromStringToStream);
+        streamStream.forEach(s ->
+                s.forEach(x -> {
+                    System.out.println(x);
+                })
+        );
+    }
+
+    public static Stream<Character> fromStringToStream(String str) {
+        ArrayList<Character> list = new ArrayList<>();
+        for (char c : str.toCharArray()) {
+            list.add(c);
+        }
+        return list.stream();
+    }
+```
+
+- 排序
+```java
+    
+    @Test
+    public void test01() {
+        // 自然排序
+        List<Integer> list = Arrays.asList(12, 43, 65, 48, 14, 156, 75);
+        list.stream().sorted().forEach(System.out::println);
+
+        // 定制排序
+        List<Employee> employeeList = getData();
+        employeeList.stream().sorted((e1,e2) -> Integer.compare(e1.getAge(),e2.getAge())).forEach(System.out::println);
+    }
+```
+- 终止操作
+ - 匹配与查找
+    ```java
+      // 检查是否匹配所有元素
+        List<Employee> employeeList = getData();
+        boolean allMatch = employeeList.stream().allMatch(e -> e.getAge() > 18);
+
+        // 检查是否有一个匹配元素
+        boolean anyMatch = employeeList.stream().anyMatch(e -> e.getSalaty() > 10000);
+
+        // 检查是否没有匹配的元素
+        boolean noneMatch = employeeList.stream().noneMatch(e -> e.getName().startsWith("雷"));
+
+        // 返回第一个元素
+        Optional<Employee> first = employeeList.stream().findFirst();
+
+        // 返回当前流中的任意元素
+        Optional<Employee> findAny = employeeList.parallelStream().findAny();
+
+        // 返回流中元素的个数
+        long count = employeeList.stream().filter(employee -> employee.getSalaty() > 5000).count();
+
+        // 返回流中最大值
+        employeeList.stream().map(e -> e.getSalaty()).max(Double::compare);
+
+        // 返回流中最小值
+        employeeList.stream().min((e1, e2) -> Double.compare(e1.getSalaty(), e2.getSalaty()));
+        // 迭代
+        employeeList.stream().forEach(System.out::println);
+        // 使用集合的遍历
+        employeeList.forEach(System.out::println);
+    ```
+
+注意:
+- stream自己不会存储元素
+- Stream不会改变源对象
+- stream延迟执行
 ## Optional类
