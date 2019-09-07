@@ -444,6 +444,53 @@ public class StreamTest {
         // 使用集合的遍历
         employeeList.forEach(System.out::println);
     ```
+    - 规约
+    ```java
+     @Test
+    public void test01() {
+        // 计算1-10的自然数的和
+        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+        // 第一个参数为初始值
+        list.stream().reduce(0,Integer::sum);
+    }
+    ```
+    - 收集
+    ```java
+        @Test
+        public void test01() {
+            List<Map<String, Object>> list = new ArrayList<>();
+            for (int i = 0; i < 3; i++) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("salary", Math.random() * 1000);
+                list.add(map);
+            }
+            // 查找工资大于500的并返回list或set等
+            List<Map<String, Object>> salary = list.stream().filter(k -> Integer.valueOf(k.get("salary").toString()) > 500).collect(Collectors.toList());
+            Set<Map<String, Object>> set = list.stream().filter(k -> Integer.valueOf(k.get("salary").toString()) > 500).collect(Collectors.toSet());
+        }
+    ```
+    - Collectors主要方法
+
+        |方法|返回类型|作用|
+        |:--:|:--:|:--:|
+        |toList|List\<T>|把流中元素收集到List|
+        |list.stream.collect(Collectors.toList())|
+        |toSet|Set\<T>|把流中元素收集到Set|
+        |list.stream.collect(Collectors.toSet())|
+        |toCollection|Collection\<T>|把流中元素收集到创建的集合|
+        |list.stream.collect(Collectors.toCollection(ArrayList::new))|
+         |counting|Long|计算流中元素的个数|
+        |list.stream.collect(Collectors.counting())|
+         |summingInt|Integer|对流中元素的整数属性求和|
+        |list.stream().collect(Collectors.summingInt(k -> Integer.valueOf(k.get("salary").toString()))|
+         |summingInt|Integer|对流中元素的整数属性求和|
+        |list.stream().collect(Collectors.summingInt(k -> Integer.valueOf(k.get("salary").toString())))|
+        |averagingInt|Integer|对流中元素的整数属性的平均值|
+        |list.stream().collect(Collectors.averagingInt(k -> Integer.valueOf(k.get("salary").toString())))|
+        |summarizingInt|Integer|收集流中整数属性的统计值,如:平均值|
+        |list.stream().collect(Collectors.averagingInt(k -> Integer.valueOf(k.get("salary").toString())))|
+
 
 注意:
 - stream自己不会存储元素
