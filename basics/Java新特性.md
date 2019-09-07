@@ -497,3 +497,156 @@ public class StreamTest {
 - Stream不会改变源对象
 - stream延迟执行
 ## Optional类
+- 简介:
+    - Optional类的开发来源于Google Guave的启发用于检查空值的方式来防止代码污染。
+    - 在Java8中是一个容器类,它可以保存类型T的值,代表这个值存在。或者保存null,表示这个值不存在，避免空指针异常
+    - Javadoc:这是一个可以为null的容器对象
+- 创建Optional类的方法:
+ ```java
+    Optional.of(T t):创建一个Optional实例,t必须非空
+    Optional.empty(): 创建一个空的Optional实例
+    Optional.ofNullable(T t): t可以为null
+ ```
+ - 判断Optional容器中是否包含对象:
+ ```java
+ boolean isPresent(): 判断是否包含对象
+ void ifPresent(Consumer<? super T> consumer):如果有值,就执行Consumer接口的实现代码,并且该值会作为参数传给它。
+ ```
+ - 获取Optional容器对象:
+ ```java
+    T get():如果调用对象包含值,返回该值,否则异常
+    T orElse(T other): 如果有值则将其返回,否则返回指定的other对象
+    T orElseGet(Supplier<? extends T> other):如果有值则将其返回,否则返回有Supplier接口实现提供的对象
+    T orElseThrow(Supplier<? extends X> exceptionSupplier):如果有值则将其返回,否则抛出由Supplier接口实现提供的异常
+ ```
+- 代码示例
+```java
+public class Girl {
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Girl{" +
+                "name='" + name + '\'' +
+                '}';
+    }
+
+    public Girl(String name) {
+        this.name = name;
+    }
+
+    public Girl() {
+    }
+}
+public class Boy {
+    private Girl girl;
+
+    public Boy(Girl girl) {
+        this.girl = girl;
+    }
+
+    public Boy() {
+    }
+
+    public Girl getGirl() {
+        return girl;
+    }
+
+    public void setGirl(Girl girl) {
+        this.girl = girl;
+    }
+
+    @Override
+    public String toString() {
+        return "Boy{" +
+                "girl=" + girl +
+                '}';
+    }
+}
+```
+```java
+/**
+ * Optional类:为了在程序种避免出现空指针异常而创建的
+ *
+ */
+public class OptionalTest {
+
+    @Test
+    public void test1() {
+        Girl girl = new Girl();
+        //  the value to describe, which must be non-{@code null}  必须不能为空
+        Optional<Girl> optionalGirl = Optional.of(girl);
+        System.out.println(optionalGirl);
+    }
+
+    @Test
+    public void test2() {
+        Girl girl = null;
+        Optional<Girl> optionalGirl = Optional.ofNullable(girl); // 对象可以为空
+        System.out.println(optionalGirl); // Optional.empty
+    }
+
+    /**
+     * 可能会出现空指针异常
+     * @param boy
+     * @return
+     */
+    public String getGrilName(Boy boy){
+        return boy.getGirl().getName();
+    }
+
+    @Test
+    public void test33() {
+        Boy boy = new Boy();
+        String girlName = getGrilName(boy);
+        System.out.println(girlName);
+    }
+
+    /**
+     * 优化（optional之前）
+     * @param boy
+     * @return
+     */
+    public String getGrilName1(Boy boy){
+        if (boy != null) {
+            Girl girl = boy.getGirl();
+            if (girl!=null) {
+                return  girl.getName();
+            }
+        }
+        return null;
+    }
+
+
+
+    /**
+     * 优化（optional之后）
+     * @param boy
+     * @return
+     */
+    public String getGrilName2(Boy boy){
+        Optional<Boy> boyOptional = Optional.ofNullable(boy);
+        Boy orElse = boyOptional.orElse(new Boy(new Girl("test")));
+
+        Girl girl = orElse.getGirl();
+        Optional<Girl> girlOptional = Optional.ofNullable(girl);
+        Girl girl1 = girlOptional.orElse(new Girl("test1"));
+        return girl1.getName();
+    }
+
+    @Test
+    public void test5(){
+        Boy boy = null;
+        String grilName2 = getGrilName2(boy);
+        System.out.println(grilName2);
+    }
+}
+```
