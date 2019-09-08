@@ -650,3 +650,156 @@ public class OptionalTest {
     }
 }
 ```
+# Java9新特性
+- 模块化系统(Jigsaw)
+    - Java运行环境的膨胀和臃肿,每次JVM启动的时候,至少会有30~60MB的内存加载,主要原因是JVM需要加载jt.jar,不管其中的类是否被classloader加载,第一步整个jar都会被JVM加载到内存当中去(而模块化根据模块的需要加载程序运行需要的class)
+    - 不同版本的类库交叉依赖导致让人头疼的问题
+    - 每一个公共类都可以被类路径之下任何其它的公共类访问到,这样就会导致无意中并不想被公开访问的API
+    - 代码示例
+        - 项目结构:
+        
+        ![项目结构](\imgage\目录结构.png)
+        ```java
+        package com.pyw;
+
+        public class Person {
+            private String name;
+            private int age;
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public int getAge() {
+                return age;
+            }
+
+            public void setAge(int age) {
+                this.age = age;
+            }
+
+            public Person() {
+            }
+
+            public Person(String name, int age) {
+                this.name = name;
+                this.age = age;
+            }
+
+            @Override
+            public String toString() {
+                return "Person{" +
+                        "name='" + name + '\'' +
+                        ", age=" + age +
+                        '}';
+            }
+        }
+
+        module java9module {
+            // 导出包
+
+            exports com.pyw;
+        }
+
+        ```
+
+        ```java
+
+        package com.pyw.javatest;
+
+        import com.pyw.Person;
+        import org.junit.Test;
+
+        public class ModuleTest {
+
+            @Test
+            public void test01() {
+                Person person = new Person();
+            }
+        }
+
+        module java9Test {
+            // 引入工程(主要引入导出内容)
+            requires java9module;
+            requires junit;
+        }
+
+        ```
+    上述代码写过Node的小伙伴们是否很眼熟呢？
+- jshell命令
+    - 实现目标:让java像脚本一样运行,从控制台启动jShell,运行一些简单的Java程序。
+    - 输出hellworld
+    ![jshellHelloWorld](\imgage\jshellHelloWorld.png)
+    - 实现1+3
+    ![jshellAdd](\imgage\jshellAdd.png)
+    - 创建加法方法
+    ![jshellAddMethod](\imgage\jshellAddMethod.png)
+    - 创建类
+    ![jshellCreateClassA](\imgage\jshellCreateClassA.png)
+    - 帮助
+    ![jshellHelp](\imgage\jshellHelp.png)
+
+- 多版本兼容jar包
+- 接口的私有方法
+- 钻石操作符的使用升级
+    - 在匿名内部类当中可以不写泛型,自动推断
+- 语法改进:try语句
+- String存储结构变更
+    - 底层原本采用char数组,改为byte数组
+- 便利的集合特性
+    - Map.of()
+    ```java
+    @Test
+    public void test01() {
+       List<String> list = new ArrayList<>();
+       list.add("Joe");
+       // 创建只读集合jdk8
+       list = Collections.unmodifiableList(list);
+       // jdk9
+        List<Integer> integers = List.of(1, 2, 3, 4, 5, 6);
+
+    }
+    ```
+- 增强的Stream API
+    ```java
+     @Test
+    public void test01() {
+        List<Integer> list = Arrays.asList(1, 2, 3, 4, 8, 9, 5);
+        // takeWhile返回从开头开始的满足条件的元素,如果有一个不满足那么则终止
+        //  list.stream().takeWhile(x -> x < 4).forEach(System.out::println);
+
+        // dropWhile返回满足条件的剩余元素
+        // list.stream().dropWhile(x -> x < 4).forEach(System.out::println);
+
+        // of的参数中的多个元素,可以包含null值,但是参数不能存储单个null
+        Stream<Integer> stream = Stream.of(1, 2, 3, null);
+        stream.forEach(System.out::println);
+    }
+
+    ```
+- Deprecated的相关API
+- java doc的HTML5支持
+- javascript引擎升级:Nashorm
+- java的动态编译器
+- InputStream增强
+    - transferTo,可以用来将数据直接传输到OutputStream
+    ```java
+
+        ```java
+        @Test
+        public void test01() {
+            ClassLoader c1 = this.getClass().getClassLoader();
+            try (InputStream is = c1.getResourceAsStream("hello.txt");
+                OutputStream os = new FileOutputStream("src\\hello1.txt")) {
+                is.transferTo(os);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        ```
+    ```
