@@ -748,6 +748,10 @@ public class OptionalTest {
 - 钻石操作符的使用升级
     - 在匿名内部类当中可以不写泛型,自动推断
 - 语法改进:try语句
+- Optional新增stream方法
+    ```java
+    Optional.stream();
+    ```
 - String存储结构变更
     - 底层原本采用char数组,改为byte数组
 - 便利的集合特性
@@ -803,3 +807,216 @@ public class OptionalTest {
         }
         ```
     ```
+# java 10新特性
+- 类型推断
+```java
+ /**
+     * 类型推断: 根据右边的值,推断左边的值
+     * 注意事项:
+     * 1. 局部变量不赋值,就不能实现类型推断
+     * 2. Lambda表达式中,左边的函数式接口不能声明为var
+     * 3. 在方法引用中,左边不能使用var
+     * 4. 数组的静态初始化中
+     * 5. 方法的返回类型
+     * 6. 方法的参数类型
+     * 7. 构造器的参数类型
+     * 8. catch块
+     * 9. 属性(即全局变量当中不能使用var，在此处不演示了，var只能用于局部变量)
+     * 总结:要想使用var推断类型,需要能够一眼识别此类型是什么
+     */
+    @Test
+    public void test01() {
+        var a = 10;
+        var list = new ArrayList<Integer>();
+        list.add(1);
+        for (var o : list) {
+            System.out.println(o); // 1
+            System.out.println(o.getClass()); // class java.lang.Integer
+        }
+        for (var i = 0; i < list.size(); i++) {
+            System.out.println(i);
+        }
+        // 错误1
+        // var num;
+        // 正确写法;
+        var num = 10;
+
+        // 错误2
+        // var sup = () -> Math.random();
+        // 正确写法
+        Supplier<Double> supplier = () -> Math.random();
+
+        // 错误3
+        // var con = System.out::println;
+        // 正确写法
+        Consumer<String> con = System.out::println;
+
+        // 错误4
+        // var arr = {1,2,3,4};
+        // 正确写法
+        var arr = new int[]{1, 2, 3, 4};
+
+    }
+
+    // 错误5
+//    public var init () {
+//
+//    }
+    // 错误6
+//    public int init(var a){
+//
+//    }
+
+    // 错误7
+//    public ModuleTest(var a ) {
+//
+//    }
+
+    public void test02 (){
+        // 错误8
+//        try {
+//
+//        }catch (var e){
+//
+//        }
+    }
+
+```
+- 工作原理
+    -  编译器先查看表达式右边部分,并根据右边变量值的类型来进行推断,作为左边变量的类型,然后将该类型写入字节码当中
+- 注意
+    - var不是一个关键字
+    - 与JavaScript当中的var不一样
+- 集合中新增copyOf()方法,创建不可变集合
+```java
+    /**
+     * 集合中新增copyof()方法,用于创建一个只读集合
+     */
+    @Test
+    public void test01() {
+        var list1 = List.of("java","python","c");
+        var copyOf = List.copyOf(list1);
+        System.out.println(list1 == copyOf); // true
+
+        var list2 = new ArrayList<String>();
+        list2.add("aaa");
+        var copyOf2 = List.copyOf(list2);
+        System.out.println(list2 == copyOf2); // false
+        // 结论: copyOf(Xxx coll):如果参数coll本身就是一个只读集合,则copyOf返回当前集合
+        // 如果参数有coll不是一个只读集合,则copyof() 返回的就是一个新的只读集合
+        // 部分关键源码
+//        static <E> List<E> copyOf(Collection<? extends E> coll) {
+//            return ImmutableCollections.listCopy(coll);
+//        }
+
+//        static <E> List<E> listCopy(Collection<? extends E> coll) {
+//            if (coll instanceof ImmutableCollections.AbstractImmutableList && coll.getClass() != ImmutableCollections.SubList.class) {
+//                return (List<E>)coll; // 如果本身是不可变集合,则返回
+//            } else {
+//                return (List<E>)List.of(coll.toArray());
+//            }
+//        }
+        
+    }
+```
+# java11 新特性
+- 继java8之后的第一个长期支持版本
+- 新增一系列字符串处理方法
+```java
+    @Test
+    public void test01() {
+        // isBlank是否为空白(忽略\t\n等以及空格判断是否为空)
+        System.out.println("".isBlank()); // true
+        // strip去除首尾的空格(可以去掉\t\n等)
+        System.out.println("\t abc \n".strip()); // abc
+
+        // stripLeading去除首部的空格
+        System.out.println("--------------------------" + "\t abc \t".stripLeading() + "-----------"); // --------------------------abc 	-----------
+
+        // stripTrailing去除尾部的空格
+        System.out.println("--------------------------" + "\t abc \t".stripTrailing() + "-----------"); // --------------------------	 abc-----------
+
+        // repeat复制5次
+        System.out.println("ABC".repeat(5)); // ABCABCABCABCABC
+
+        // lines().count()判断当前有字符串有多少行
+        System.out.println("abc".lines().count()); // 1
+        System.out.println("abc\ncdbs".lines().count()); // 2
+
+    }
+```
+- Optional 新增方法
+```java
+// Optional 新增方法
+    @Test
+    public void test02() {
+        var op = Optional.empty();
+        // jdk 8 判断是否存在
+        System.out.println(op.isPresent());
+
+        // jdk11 判断是否为空
+        System.out.println(op.isEmpty());
+
+        var obj = op.orElseThrow();
+        
+        // 返回value的值,如果没有值则抛异常
+        System.out.println(obj);
+    }
+```
+- 全新的HTTP客户端API
+```java
+    /**
+     * HttpClient
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    @Test
+    public void test02() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder(URI.create("https://www.baidu.com")).build();
+        HttpResponse.BodyHandler<String> bodyHandler = HttpResponse.BodyHandlers.ofString();
+        HttpResponse<String> send = client.send(request, bodyHandler);
+        String body = send.body();
+        System.out.println(body);
+
+    }
+```
+- 记得在模块当中引入
+```java
+  requires java.net.http;
+```
+- 可以更加便捷的编译运行类
+- jdk11以前
+```shell
+javac Hello.java
+java Hello
+```
+- jdk11
+```shell
+java Hello.java
+```
+- ZGC
+- 背景:
+    - GC是Java主要优势之一。然而，当GC停顿太长,就会开始影响应用的响应时间
+    - 消除或减少GC停顿时长,java将对更广泛的应用场景是一个更有吸引力的平台
+    - 现代系统中可用内存不端增长,用户和程序员希望JVM能够以高效的方式充分利用这些内存,并且无需长时间的GC暂停时间
+- ZGC是JDK11最为瞩目的特性,没有之一。但官方给出的后缀为Experimental(实验的),还不建议用到生产环境当中
+- ZGC是一个并发,基于region,压缩性的垃圾收集器,只有root扫描阶段会STW(stop the world),因此GC停顿时间不会随着堆的增长和存活对象的增长而变长
+- 优势:
+    - GC暂停时间不会超过10ms
+    - 既能处理几百兆的小堆,也能够处理几个T的大堆
+    - 和G1相比,应用吞吐能力不会下降超过15%
+    - 为未来的GC能工和利用colord指针以及Load barriers优化奠定基础
+- 设计目标
+    - 支持TB级内存
+    - 暂停时间低(<10ms>)
+    - 对整个程序的吞吐量影响小于15%
+    - 扩展实现机制
+    - 多层堆(即热对象置于DRAM和冷对象置于NVMe闪存)或者压缩堆
+- Unicode 10
+- Deprecate the Pack200 Tools and API
+- 新的Epslion垃圾收集器
+- 完全支持Linux容器(包括docker)
+- 支持G1上的并行完全垃圾收集
+- 最新的HTTPS安全协议TLS 1.3
+- Java Flight Recorder
