@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+	</head>
+	<body>
+		<!-- 补充 -->
+		<!-- 表头标签将 td 换为 th 文字就可以出现加粗及居中的效果 -->
+		<table border="1px" cellspacing="0">
+			<!-- 可以使用colgroup标签改进 -->
+			<!-- <colgroup span="6" width = "100px"></colgroup> 将前6列的宽度设置为100px -->
+			<!-- <colgroup span="1" width = "200px"></colgroup> 将最后一列的宽度设置为200px -->
+			
+			<col width="100px" />
+			<col width="100px" />
+			<col width="100px" />
+			<col width="100px" />
+			<col width="100px" />
+			<col width="100px" />
+			<col width="200px" />
+			<tr align="center" height="40px">
+				<!-- 跨7列 colspan="7"-->
+				<td colspan="7">个人简历</td>
+			</tr>
+			<tr align="center" height="40px">
+				<td>姓名</td>
+				<td></td>
+				<td>性别</td>
+				<td></td>
+				<td>年龄</td>
+				<td></td>
+				<td rowspan="4">照片</td>
+			</tr>
+			<tr align="center" height="40px">
+				<td>学历</td>
+				<td></td>
+				<td>籍贯</td>
+				<!-- 跨3列 colspan="3"-->
+				<td colspan="3"></td>
+			</tr>
+			<tr align="center" height="40px">
+				<td>电话</td>
+				<td></td>
+				<td>政治面貌</td>
+				<!-- 跨3列 colspan="3"-->
+				<td colspan="3"></td>
+			</tr>
+			<tr align="center" height="40px">
+				<td>毕业院校</td>
+				<!-- 跨5列 colspan="5"-->
+				<td colspan="5"></td>
+			</tr>
+			<tr align="center" height="40px">
+				<td>求职意向</td>
+				<!-- 跨6列 colspan="6"-->
+				<td colspan="6"></td>
+			</tr>
+		</table>
+	</body>
+</html>
