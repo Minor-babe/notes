@@ -1,5 +1,22 @@
 # 什么是CSS？
 CSS:(Cascading Style Sheet)层叠样式表
+
+# CSS基础语法
+
+选择器{属性1:值1;属性值2:值2}
+
+# CSS背景样式
+
+background-color:背景颜色
+
+background-image:背景图片
+
+background-repeat:背景图片的平铺方式
+
+background-position:背景图片的位置
+
+background-attachment:背景图片随滚动条的移动方式
+
 # 常用的CSS
 - text-align:center;让内部元素水平居中(注意:如果此元素撑满了整个宽度则无法居中)
 - margin:auto;让元素本身水平居中
