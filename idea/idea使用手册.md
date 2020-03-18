@@ -69,3 +69,9 @@ docker run -p 5005:8070 docker-test
 
 7. 成功图示
 ![成功示意.png](img/成功示意.png)
+
+
+
+# 三、更改父子项目中的下载地址
+
+找到.idea文件夹修改workspace.xml中mavenxxxx节点
